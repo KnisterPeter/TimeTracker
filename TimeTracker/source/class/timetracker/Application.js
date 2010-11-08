@@ -37,8 +37,11 @@ qx.Class.define("timetracker.Application", {
       this._removeProjectCmd = new qx.ui.core.Command(null);
       this._removeProjectCmd.setEnabled(false);
       this._removeProjectCmd.addListener('execute', function(e) {
-        timetracker.Storage.getInstance().getModel().delProject(this._tree.getSelection());
-        timetracker.Storage.getInstance().save();
+        var project = this._tree.getSelection();
+        timetracker.ConfirmDialog.confirm('Really delete project ' + project.getName() + '?', function() {
+          timetracker.Storage.getInstance().getModel().delProject(project);
+          timetracker.Storage.getInstance().save();
+        });
       }, this);
 
       this._newTaskCmd = new qx.ui.core.Command(null);
@@ -65,8 +68,10 @@ qx.Class.define("timetracker.Application", {
       this._removeTaskCmd.setEnabled(false);
       this._removeTaskCmd.addListener('execute', function(e) {
         var task = this._tree.getSelection();
-        task.getProject().delTask(task);
-        timetracker.Storage.getInstance().save();
+        timetracker.ConfirmDialog.confirm('Really delete task ' + task.getName() + '?', function() {
+          task.getProject().delTask(task);
+          timetracker.Storage.getInstance().save();
+        });
       }, this);
 
       this._startTaskCmd = new qx.ui.core.Command(null);
@@ -134,10 +139,10 @@ qx.Class.define("timetracker.Application", {
       composite.add(this._getNewTaskButton());
       composite.add(this._getEditTaskButton());
       composite.add(this._getRemoveTaskButton());
-
-      composite.add(new qx.ui.basic.Label('Other:').set({margin:5}));
       composite.add(this._getStartTaskButton());
       composite.add(this._getStopTaskButton());
+
+      composite.add(new qx.ui.basic.Label('Other:').set({margin:5}));
       var button = new qx.ui.form.Button("Reset").set({margin:5});
       composite.add(button);
       button.addListener("execute", function(e) {
