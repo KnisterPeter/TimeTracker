@@ -74,6 +74,11 @@ qx.Class.define('timetracker.Task', {
       }
     },
 
+    clear: function() {
+      this.stop();
+      this.setOpenTime(0);
+    },
+
     getTotalTime: function(format) {
       var time = this.getOpenTime();
       if (this.getStartTime() > 0) {

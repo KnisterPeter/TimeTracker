@@ -62,6 +62,12 @@ qx.Class.define('timetracker.Project', {
     delTask: function(task) {
       delete this.getTasks()[task.getName()];
       this.fireDataEvent('updatedTask', {type: 'del', task: task});
+    },
+
+    clear: function() {
+      qx.lang.Object.getValues(this.getTasks()).forEach(function(task) {
+        task.clear();
+      }, this);
     }
   }
 });

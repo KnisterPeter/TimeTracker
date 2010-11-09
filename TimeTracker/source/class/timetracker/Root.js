@@ -48,6 +48,12 @@ qx.Class.define('timetracker.Root', {
     delProject: function(project) {
       delete this.getProjects()[project.getName()];
       this.fireDataEvent('updatedProject', {type: 'del', project: project});
+    },
+
+    clear: function() {
+      qx.lang.Object.getValues(this.getProjects()).forEach(function(project) {
+        project.clear();
+      }, this);
     }
   }
 });

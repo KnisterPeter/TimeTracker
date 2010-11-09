@@ -88,6 +88,13 @@ qx.Class.define("timetracker.Application", {
       timetracker.Storage.getInstance().addListener('changeActiveTask', function(e) {
         this._stopTaskCmd.setEnabled(e.getData() !== null);
       }, this);
+
+      this._clearTasksCmd = new qx.ui.core.Command(null);
+      this._clearTasksCmd.addListener('execute', function(e) {
+        timetracker.ConfirmDialog.confirm('Clear all times?', function() {
+          timetracker.Storage.getInstance().clear();
+        });
+      }, this);
     },
 
     _getLayout: function() {
@@ -109,6 +116,9 @@ qx.Class.define("timetracker.Application", {
     },
 
     _getMenu: function() {
+      var file  = new qx.ui.menu.Menu();
+      file.add(new qx.ui.menu.Button('Clear Tasks', 'timetracker/time_go.png', this._clearTasksCmd));
+
       var project  = new qx.ui.menu.Menu();
       project.add(new qx.ui.menu.Button('New', 'timetracker/report_add.png', this._newProjectCmd));
       project.add(new qx.ui.menu.Button('Edit', 'timetracker/report_edit.png', this._editProjectCmd));
@@ -122,9 +132,26 @@ qx.Class.define("timetracker.Application", {
       task.add(new qx.ui.menu.Button('Stop', 'timetracker/control_stop_blue.png', this._stopTaskCmd));
 
       var menubar = new qx.ui.menubar.MenuBar();
+      menubar.add(new qx.ui.menubar.Button('File', null, file));
       menubar.add(new qx.ui.menubar.Button('Project', null, project));
       menubar.add(new qx.ui.menubar.Button('Task', null, task));
       return menubar;
+    },
+
+    _getContextMenu: function() {
+      var menu = new qx.ui.menu.Menu();
+      menu.add(new qx.ui.menu.Button('New Project', 'timetracker/report_add.png', this._newProjectCmd));
+      menu.add(new qx.ui.menu.Button('Edit Project', 'timetracker/report_edit.png', this._editProjectCmd));
+      menu.add(new qx.ui.menu.Button('Remove Project', 'timetracker/report_delete.png', this._removeProjectCmd));
+      menu.addSeparator();
+      menu.add(new qx.ui.menu.Button('New Task', 'timetracker/page_white_add.png', this._newTaskCmd));
+      menu.add(new qx.ui.menu.Button('Edit Task', 'timetracker/page_white_edit.png', this._editTaskCmd));
+      menu.add(new qx.ui.menu.Button('Remove Task', 'timetracker/page_white_delete.png', this._removeTaskCmd));
+      menu.add(new qx.ui.menu.Button('Start Task', 'timetracker/control_play_blue.png', this._startTaskCmd));
+      menu.add(new qx.ui.menu.Button('Stop Task', 'timetracker/control_stop_blue.png', this._stopTaskCmd));
+      menu.addSeparator();
+      menu.add(new qx.ui.menu.Button('Clear Tasks', 'timetracker/time_go.png', this._clearTasksCmd));
+      return menu;
     },
 
     _getButtons: function() {
@@ -143,11 +170,7 @@ qx.Class.define("timetracker.Application", {
       composite.add(this._getStopTaskButton());
 
       composite.add(new qx.ui.basic.Label('Other:').set({margin:5}));
-      var button = new qx.ui.form.Button("Reset").set({margin:5});
-      composite.add(button);
-      button.addListener("execute", function(e) {
-        localStorage.removeItem('timetracker.projects');
-      });
+      composite.add(this._getClearTasksButton());
 
       return composite;
     },
@@ -203,8 +226,16 @@ qx.Class.define("timetracker.Application", {
       return button;
     },
 
+    _getClearTasksButton: function() {
+      var button = new qx.ui.form.Button('Clear', 'timetracker/time_go.png').set({margin:5});
+      button.setCommand(this._clearTasksCmd);
+      button.setCenter(false);
+      return button;
+    },
+
     _getTree: function() {
       this._tree = new timetracker.Tree();
+      this._tree.getTree().setContextMenu(this._getContextMenu());
       this._tree.getTree().addListener('changeSelection', function(e) {
         var sel = e.getData();
         var item = sel.length > 0 ? sel[0].getModel() : null;

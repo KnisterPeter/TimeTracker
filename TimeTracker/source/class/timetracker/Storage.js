@@ -28,6 +28,11 @@ qx.Class.define('timetracker.Storage', {
       this.setModel(new timetracker.Root(data));
     },
 
+    clear: function() {
+      this.getModel().clear();
+      this.save();
+    },
+
     _applyActiveTask: function(task, old) {
       if (old != null) {
         old.stop();

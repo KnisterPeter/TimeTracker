@@ -37,6 +37,7 @@ qx.Class.define('timetracker.ConfirmDialog', {
     buttons.add(cancelBtn);
     this.add(buttons);
 
+    this.setWidth(200);
     this.center();
     this.open();
   }
