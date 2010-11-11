@@ -21,7 +21,7 @@ qx.Class.define("timetracker.Application", {
     _createCommands: function() {
       this._newProjectCmd = new qx.ui.core.Command(null);
       this._newProjectCmd.addListener('execute', function(e) {
-        var dlg = new timetracker.ProjectDialog();
+        var dlg = new timetracker.ui.ProjectDialog();
         dlg.center();
         dlg.open();
       }, this);
@@ -29,7 +29,7 @@ qx.Class.define("timetracker.Application", {
       this._editProjectCmd = new qx.ui.core.Command(null);
       this._editProjectCmd.setEnabled(false);
       this._editProjectCmd.addListener('execute', function(e) {
-        var dlg = new timetracker.ProjectDialog(this._tree.getSelection());
+        var dlg = new timetracker.ui.ProjectDialog(this._tree.getSelection());
         dlg.center();
         dlg.open();
       }, this);
@@ -38,19 +38,20 @@ qx.Class.define("timetracker.Application", {
       this._removeProjectCmd.setEnabled(false);
       this._removeProjectCmd.addListener('execute', function(e) {
         var project = this._tree.getSelection();
-        timetracker.ConfirmDialog.confirm('Really delete project ' + project.getName() + '?', function() {
+        timetracker.ui.ConfirmDialog.confirm('Really delete project ' + project.getName() + '?', function() {
           timetracker.Storage.getInstance().getModel().delProject(project);
           timetracker.Storage.getInstance().save();
         });
       }, this);
 
       this._newTaskCmd = new qx.ui.core.Command(null);
+      this._newTaskCmd.setEnabled(false);
       this._newTaskCmd.addListener('execute', function(e) {
         var sel = this._tree.getSelection();
-        if (sel instanceof timetracker.Task) {
+        if (sel instanceof timetracker.model.Task) {
           sel = sel.getProject();
         }
-        var dlg = new timetracker.TaskDialog(sel);
+        var dlg = new timetracker.ui.TaskDialog(sel);
         dlg.center();
         dlg.open();
       }, this);
@@ -59,7 +60,7 @@ qx.Class.define("timetracker.Application", {
       this._editTaskCmd.setEnabled(false);
       this._editTaskCmd.addListener('execute', function(e) {
         var task = this._tree.getSelection();
-        var dlg = new timetracker.TaskDialog(task.getProject(), task);
+        var dlg = new timetracker.ui.TaskDialog(task.getProject(), task);
         dlg.center();
         dlg.open();
       }, this);
@@ -68,10 +69,20 @@ qx.Class.define("timetracker.Application", {
       this._removeTaskCmd.setEnabled(false);
       this._removeTaskCmd.addListener('execute', function(e) {
         var task = this._tree.getSelection();
-        timetracker.ConfirmDialog.confirm('Really delete task ' + task.getName() + '?', function() {
+        timetracker.ui.ConfirmDialog.confirm('Really delete task ' + task.getName() + '?', function() {
           task.getProject().delTask(task);
           timetracker.Storage.getInstance().save();
         });
+      }, this);
+
+      this._addTimeCmd = new qx.ui.core.Command(null);
+      this._addTimeCmd.setEnabled(false);
+      this._addTimeCmd.addListener('execute', function(e) {
+      }, this);
+
+      this._removeTimeCmd = new qx.ui.core.Command(null);
+      this._removeTimeCmd.setEnabled(false);
+      this._removeTimeCmd.addListener('execute', function(e) {
       }, this);
 
       this._startTaskCmd = new qx.ui.core.Command(null);
@@ -91,7 +102,7 @@ qx.Class.define("timetracker.Application", {
 
       this._clearTasksCmd = new qx.ui.core.Command(null);
       this._clearTasksCmd.addListener('execute', function(e) {
-        timetracker.ConfirmDialog.confirm('Clear all times?', function() {
+        timetracker.ui.ConfirmDialog.confirm('Clear all times?', function() {
           timetracker.Storage.getInstance().clear();
         });
       }, this);
@@ -130,6 +141,9 @@ qx.Class.define("timetracker.Application", {
       task.add(new qx.ui.menu.Button('Remove', 'timetracker/page_white_delete.png', this._removeTaskCmd));
       task.add(new qx.ui.menu.Button('Start', 'timetracker/control_play_blue.png', this._startTaskCmd));
       task.add(new qx.ui.menu.Button('Stop', 'timetracker/control_stop_blue.png', this._stopTaskCmd));
+      task.addSeparator();
+      task.add(new qx.ui.menu.Button('Add Time', null, this._addTimeCmd));
+      task.add(new qx.ui.menu.Button('Remove Time', null, this._removeTimeCmd));
 
       var menubar = new qx.ui.menubar.MenuBar();
       menubar.add(new qx.ui.menubar.Button('File', null, file));
@@ -138,18 +152,30 @@ qx.Class.define("timetracker.Application", {
       return menubar;
     },
 
-    _getContextMenu: function() {
+    _createContextMenu: function(selection) {
       var menu = new qx.ui.menu.Menu();
+
+      // Project entries
       menu.add(new qx.ui.menu.Button('New Project', 'timetracker/report_add.png', this._newProjectCmd));
-      menu.add(new qx.ui.menu.Button('Edit Project', 'timetracker/report_edit.png', this._editProjectCmd));
-      menu.add(new qx.ui.menu.Button('Remove Project', 'timetracker/report_delete.png', this._removeProjectCmd));
+      if (selection instanceof timetracker.model.Project) {
+        menu.add(new qx.ui.menu.Button('Edit Project', 'timetracker/report_edit.png', this._editProjectCmd));
+        menu.add(new qx.ui.menu.Button('Remove Project', 'timetracker/report_delete.png', this._removeProjectCmd));
+      }
       menu.addSeparator();
+
+      // Task entries
       menu.add(new qx.ui.menu.Button('New Task', 'timetracker/page_white_add.png', this._newTaskCmd));
-      menu.add(new qx.ui.menu.Button('Edit Task', 'timetracker/page_white_edit.png', this._editTaskCmd));
-      menu.add(new qx.ui.menu.Button('Remove Task', 'timetracker/page_white_delete.png', this._removeTaskCmd));
-      menu.add(new qx.ui.menu.Button('Start Task', 'timetracker/control_play_blue.png', this._startTaskCmd));
-      menu.add(new qx.ui.menu.Button('Stop Task', 'timetracker/control_stop_blue.png', this._stopTaskCmd));
+      if (selection instanceof timetracker.model.Task) {
+        menu.add(new qx.ui.menu.Button('Edit Task', 'timetracker/page_white_edit.png', this._editTaskCmd));
+        menu.add(new qx.ui.menu.Button('Remove Task', 'timetracker/page_white_delete.png', this._removeTaskCmd));
+        menu.add(new qx.ui.menu.Button('Start Task', 'timetracker/control_play_blue.png', this._startTaskCmd));
+        menu.add(new qx.ui.menu.Button('Stop Task', 'timetracker/control_stop_blue.png', this._stopTaskCmd));
+        menu.addSeparator();
+        menu.add(new qx.ui.menu.Button('Add Time', null, this._addTimeCmd));
+        menu.add(new qx.ui.menu.Button('Remove Time', null, this._removeTimeCmd));
+      }
       menu.addSeparator();
+
       menu.add(new qx.ui.menu.Button('Clear Tasks', 'timetracker/time_go.png', this._clearTasksCmd));
       return menu;
     },
@@ -234,19 +260,24 @@ qx.Class.define("timetracker.Application", {
     },
 
     _getTree: function() {
-      this._tree = new timetracker.Tree();
-      this._tree.getTree().setContextMenu(this._getContextMenu());
-      this._tree.getTree().addListener('changeSelection', function(e) {
+      this._tree = new timetracker.ui.Tree();
+      var tree = this._tree.getTree();
+      tree.setContextMenu(this._createContextMenu());
+      tree.addListener('changeSelection', function(e) {
         var sel = e.getData();
         var item = sel.length > 0 ? sel[0].getModel() : null;
-        var projEnabled = item !== null && item instanceof timetracker.Project;
-        var taskEnabled = item !== null && item instanceof timetracker.Task;
+        var projEnabled = item !== null && item instanceof timetracker.model.Project;
+        var taskEnabled = item !== null && item instanceof timetracker.model.Task;
         this._editProjectCmd.setEnabled(projEnabled);
         this._removeProjectCmd.setEnabled(projEnabled);
         this._newTaskCmd.setEnabled(projEnabled || taskEnabled);
         this._editTaskCmd.setEnabled(taskEnabled);
         this._removeTaskCmd.setEnabled(taskEnabled);
         this._startTaskCmd.setEnabled(taskEnabled);
+        this._addTimeCmd.setEnabled(taskEnabled);
+        this._removeTimeCmd.setEnabled(taskEnabled);
+
+        tree.setContextMenu(this._createContextMenu(item));
       }, this);
 
       return this._tree.getTree();

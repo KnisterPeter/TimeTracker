@@ -5,13 +5,13 @@ qx.Class.define('timetracker.Storage', {
   properties: {
     model: {
       init: null,
-      check: 'timetracker.Root',
+      check: 'timetracker.model.Root',
       event: 'changeModel'
     },
     activeTask: {
       init: null,
       nullable: true,
-      check: 'timetracker.Task',
+      check: 'timetracker.model.Task',
       apply: '_applyActiveTask',
       event: 'changeActiveTask'
     }
@@ -25,7 +25,7 @@ qx.Class.define('timetracker.Storage', {
     load: function() {
       var data = localStorage.getItem('timetracker.projects');
       if (data) { data = qx.util.Json.parse(data); }
-      this.setModel(new timetracker.Root(data));
+      this.setModel(new timetracker.model.Root(data));
     },
 
     clear: function() {

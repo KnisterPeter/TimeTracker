@@ -1,4 +1,4 @@
-qx.Class.define('timetracker.Root', {
+qx.Class.define('timetracker.model.Root', {
   extend: qx.core.Object,
 
   construct: function(input) {
@@ -22,7 +22,7 @@ qx.Class.define('timetracker.Root', {
     fromNative: function(input) {
       var projects = {}; 
       input.forEach(function(entry) {
-        var project = new timetracker.Project(entry);
+        var project = new timetracker.model.Project(entry);
         projects[project.getName()] = project;
       }, this);
       this.setProjects(projects);

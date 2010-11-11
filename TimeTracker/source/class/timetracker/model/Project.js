@@ -1,4 +1,4 @@
-qx.Class.define('timetracker.Project', {
+qx.Class.define('timetracker.model.Project', {
   extend: qx.core.Object,
 
   construct: function(input) {
@@ -27,7 +27,7 @@ qx.Class.define('timetracker.Project', {
       var tasks = {}; 
       if (input['tasks']) {
         input.tasks.forEach(function(entry) {
-          var task = new timetracker.Task(this, entry);
+          var task = new timetracker.model.Task(this, entry);
           tasks[task.getName()] = task;
         }, this);
       }

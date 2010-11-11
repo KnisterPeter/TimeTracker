@@ -1,4 +1,4 @@
-qx.Class.define('timetracker.ProjectDialog', {
+qx.Class.define('timetracker.ui.ProjectDialog', {
   extend: qx.ui.window.Window,
 
   construct: function(project) {
@@ -11,7 +11,7 @@ qx.Class.define('timetracker.ProjectDialog', {
 
     if (!project) {
       this._new = true;
-      project = new timetracker.Project();
+      project = new timetracker.model.Project();
     }
     this.setProject(project);
   },

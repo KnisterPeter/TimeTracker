@@ -1,4 +1,4 @@
-qx.Class.define('timetracker.Tree', {
+qx.Class.define('timetracker.ui.Tree', {
   extend: qx.core.Object,
 
   construct: function() {

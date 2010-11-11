@@ -1,8 +1,8 @@
-qx.Class.define('timetracker.ConfirmDialog', {
+qx.Class.define('timetracker.ui.ConfirmDialog', {
   extend: qx.ui.window.Window,
   statics: {
     confirm: function(question, callback) {
-      new timetracker.ConfirmDialog(question, callback);
+      new timetracker.ui.ConfirmDialog(question, callback);
     }
   },
   construct: function(question, callback) {

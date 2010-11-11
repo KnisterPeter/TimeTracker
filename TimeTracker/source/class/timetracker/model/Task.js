@@ -1,4 +1,4 @@
-qx.Class.define('timetracker.Task', {
+qx.Class.define('timetracker.model.Task', {
   extend: qx.core.Object,
 
   construct: function(project, input) {
