@@ -52,6 +52,10 @@ qx.Class.define('timetracker.model.Task', {
       };
     },
 
+    isActive: function() {
+      return this.getStartTime() > 0;
+    },
+
     start: function() {
       if (this.getStartTime() == 0) {
         this.setStartTime(qx.lang.Date.now());

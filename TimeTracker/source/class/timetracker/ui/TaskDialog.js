@@ -9,6 +9,11 @@ qx.Class.define('timetracker.ui.TaskDialog', {
     this.add(new qx.ui.form.renderer.Single(this._form));
     this.setModal(true);
 
+    this._running = task.isActive();
+    if (this._running) {
+      timetracker.Storage.getInstance().stopTask();
+    }
+
     this.setProject(project);
     if (!task) {
       this._new = true;
@@ -30,9 +35,11 @@ qx.Class.define('timetracker.ui.TaskDialog', {
 
   members: {
     _new: false,
+    _running: false,
     _ctrl: null,
     _form: null,
     _name: null,
+    _time: null,
     _save: null,
     _cancel: null,
 
@@ -41,6 +48,9 @@ qx.Class.define('timetracker.ui.TaskDialog', {
 
       this._name = new qx.ui.form.TextField();
       this._form.add(this._name, 'Name');
+
+      this._time = new qx.ui.form.TextField();
+      this._form.add(this._time, 'Time', null, 'openTime');
 
       this._save = new qx.ui.form.Button('Save');
       this._save.addListener('execute', this._onSave, this);
@@ -53,6 +63,23 @@ qx.Class.define('timetracker.ui.TaskDialog', {
       this._form.addButton(this._cancel);
 
       this._ctrl = new qx.data.controller.Form(null, this._form);
+      this._ctrl.addBindingOptions('openTime', {converter: this.__model2time}, {converter: this.__time2model});
+    },
+
+    __model2time: function(data, model) {
+      var time = data / 1000 / 60;
+      var hour = (time / 60).toFixed(1).toString();
+      var min = (time % 60).toFixed(1).toString();
+
+      hour = hour.substr(0, hour.indexOf('.'));
+      min = min.substr(0, min.indexOf('.'));
+      time = (hour < 10 ? '0' + hour : hour) + ':' + (min < 10 ? '0' + min : min);
+      return time;
+    },
+
+    __time2model: function(data, model) {
+      var parts = data.split(':');
+      return parseInt(parts[0], 10) * 60 * 60 * 1000 + parseInt(parts[1], 10) * 60 * 1000;
     },
 
     _applyTask: function(task) {
@@ -62,6 +89,9 @@ qx.Class.define('timetracker.ui.TaskDialog', {
     _onSave: function() {
       if (this._new) {
         this.getProject().addTask(this.getTask());
+      }
+      if (this._running) {
+        timetracker.Storage.getInstance().startTask(this.getTask());
       }
       timetracker.Storage.getInstance().save();
       this.close();
