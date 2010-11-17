@@ -9,15 +9,14 @@ qx.Class.define('timetracker.ui.TaskDialog', {
     this.add(new qx.ui.form.renderer.Single(this._form));
     this.setModal(true);
 
-    this._running = task.isActive();
-    if (this._running) {
-      timetracker.Storage.getInstance().stopTask();
-    }
-
     this.setProject(project);
     if (!task) {
       this._new = true;
       task = new timetracker.model.Task(project);
+    }
+    this._running = task.isActive();
+    if (this._running) {
+      timetracker.Storage.getInstance().stopTask();
     }
     this.setTask(task);
   },
