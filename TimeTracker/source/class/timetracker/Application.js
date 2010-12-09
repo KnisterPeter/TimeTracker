@@ -16,6 +16,7 @@ qx.Class.define("timetracker.Application", {
       this._createCommands();
       this.getRoot().add(this._getLayout(), {edge:0});
       timetracker.Storage.getInstance().load();
+      this._setupStatusBarTotalTime();
     },
 
     _createCommands: function() {
@@ -104,6 +105,7 @@ qx.Class.define("timetracker.Application", {
       composite.add(this._getMenu(), {edge:'north'});
       composite.add(this._getButtons(), {edge:'west'});
       composite.add(this._getTree(), {edge:'center'});
+      composite.add(this._getStatusBar(), {edge:'south'});
       return composite;
     },
 
@@ -114,6 +116,28 @@ qx.Class.define("timetracker.Application", {
       composite.add(new qx.ui.core.Spacer(), {flex: 1});
       composite.add(new qx.ui.basic.Label('v1.0'));
       return composite;
+    },
+
+    _getStatusBar: function() {
+      var composite = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+      composite.add(this._getStatusBarTotalTime());
+//      composite.add(new qx.ui.core.Spacer(), {flex: 1});
+//      composite.add(new qx.ui.basic.Label('v1.0'));
+      return composite;
+    },
+
+    _getStatusBarTotalTime: function() {
+      if (!this._timeLabel) {
+        this._timeLabel = new qx.ui.basic.Label('Total Time: 00:00');
+      }
+      return this._timeLabel;
+    },
+
+    _setupStatusBarTotalTime: function() {
+      timetracker.Storage.getInstance().getModel().addListener('updatedTime', function() {
+        this._getStatusBarTotalTime().setValue('Total Time: ' + timetracker.Storage.getInstance().getModel().getTotalTime(true));
+      }, this);
+      this._getStatusBarTotalTime().setValue('Total Time: ' + timetracker.Storage.getInstance().getModel().getTotalTime(true));
     },
 
     _getMenu: function() {

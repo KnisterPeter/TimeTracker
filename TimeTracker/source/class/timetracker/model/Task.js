@@ -89,13 +89,7 @@ qx.Class.define('timetracker.model.Task', {
         time += (qx.lang.Date.now() - this.getStartTime());
       }
       if (format) {
-        time = time / 1000 / 60;
-        var hour = (time / 60).toFixed(1).toString();
-        var min = (time % 60).toFixed(1).toString();
-
-        hour = hour.substr(0, hour.indexOf('.'));
-        min = min.substr(0, min.indexOf('.'));
-        time = (hour < 10 ? '0' + hour : hour) + ':' + (min < 10 ? '0' + min : min);
+        time = timetracker.Format.time(time);
       }
       return time;
     }

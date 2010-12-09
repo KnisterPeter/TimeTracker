@@ -49,18 +49,23 @@ qx.Class.define('timetracker.ui.Tree', {
 
     _createProjectNode: function(project) {
       var folder = new qx.ui.tree.TreeFolder();
+      var time = new qx.ui.basic.Label('' + project.getTotalTime(true));
       folder.setIcon('timetracker/report.png');
       folder.addSpacer();
-      folder.addOpenButton();
       folder.addIcon();
+      folder.addWidget(new qx.ui.core.Spacer(5));
+      folder.addWidget(time);
+      folder.addWidget(new qx.ui.core.Spacer(5));
       folder.addLabel(project.getName());
       folder.setOpen(true);
       folder.setModel(project);
       this._rootNode.add(folder);
+
       qx.lang.Object.getValues(project.getTasks()).forEach(function(task) { this._createTaskNode(folder, task); }, this);
 
       project.addListener('changeName', function(e) { folder.setLabel(e.getData()); });
       project.addListener('updatedTask', function(e) { this._onTaskUpdate(e, folder) }, this);
+      project.addListener('updatedTime', function(e) { time.setValue('' + project.getTotalTime(true)); }, this);
     },
 
     _removeProjectNode: function(project) {
@@ -88,9 +93,9 @@ qx.Class.define('timetracker.ui.Tree', {
       var time = new qx.ui.basic.Label("00:00");
       this._updateTaskIcon(task, file, time);
       file.addIcon();
-      file.addWidget(new qx.ui.core.Spacer(10));
+      file.addWidget(new qx.ui.core.Spacer(5));
       file.addWidget(time);
-      file.addWidget(new qx.ui.core.Spacer(10));
+      file.addWidget(new qx.ui.core.Spacer(5));
       file.setModel(task);
       file.addLabel(task.getName());
       parent.add(file);
